@@ -9,7 +9,7 @@ class GildedRoseTest(unittest.TestCase):
         items = [Item("foo", 0, 0)]
         gilded_rose = GildedRose(items)
         gilded_rose.update_quality()
-        self.assertEquals("fixme", items[0].name)
+        self.assertEquals("foo", items[0].name)
     
     def test_conjured_items_degrade_normally(self):
         # Conjured items should degrade faster, but the original code doesn't handle them correctly
