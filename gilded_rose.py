@@ -21,7 +21,10 @@ class GildedRose(object):
     def update_quality(self):
         for item in self.items:
             if item.name != "Aged Brie" and item.name != "Backstage passes to a TAFKAL80ETC concert":
-                if item.quality > 0:
+                #updated code here for "conjured Mana Cake"
+                if item.name == "Conjured Mana Cake" and item.quality >= 2:
+                    item.quality = item.quality - 2
+                elif item.quality > 0:
                     if item.name != "Sulfuras, Hand of Ragnaros":
                         item.quality = item.quality - 1
             else:
@@ -47,3 +50,6 @@ class GildedRose(object):
                 else:
                     if item.quality < 50:
                         item.quality = item.quality + 1
+         # updated code here so quality never goes below 0 even the set up quality is negative
+        item.quality = max(0, item.quality)
+
