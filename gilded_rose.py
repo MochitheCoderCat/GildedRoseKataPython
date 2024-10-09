@@ -11,45 +11,73 @@ class Item:
     def __repr__(self):
         return "%s, %s, %s" % (self.name, self.sell_in, self.quality)
 
+class QualityUpdater:
+    """Base class for item quality update strategies."""
+    def update(self, item):
+        raise NotImplementedError("Subclasses must override the update method")
 
-class GildedRose(object):
 
+class RegularItemUpdater(QualityUpdater):
+    def update(self, item):
+        item.sell_in -= 1
+        if item.quality > 0:
+            item.quality -= 1
+        if item.sell_in < 0 and item.quality > 0:
+            item.quality -= 1
+        item.quality = max(0, item.quality)
+
+
+class AgedBrieUpdater(QualityUpdater):
+    def update(self, item):
+        item.sell_in -= 1
+        if item.quality < 50:
+            item.quality += 1
+            if item.sell_in < 0 and item.quality < 50:
+                item.quality += 1
+
+
+class BackstagePassUpdater(QualityUpdater):
+    def update(self, item):
+        item.sell_in -= 1
+        if item.sell_in < 0:
+            item.quality = 0
+        else:
+            item.quality += 1
+            if item.sell_in < 10:
+                item.quality += 1
+            if item.sell_in < 5:
+                item.quality += 1
+        item.quality = min(50, item.quality)
+
+
+class SulfurasUpdater(QualityUpdater):
+    def update(self, item):
+        # Legendary item, quality and sell_in do not change
+        pass
+
+
+class ConjuredItemUpdater(QualityUpdater):
+    def update(self, item):
+        item.sell_in -= 1
+        if item.quality > 0:
+            item.quality -= 2
+        if item.sell_in < 0 and item.quality > 0:
+            item.quality -= 2
+        item.quality = max(0, item.quality)
+
+
+class GildedRose:
     def __init__(self, items: list[Item]):
-        # DO NOT CHANGE THIS ATTRIBUTE!!!
         self.items = items
+        self.updater_map = {
+            "Aged Brie": AgedBrieUpdater(),
+            "Backstage passes to a TAFKAL80ETC concert": BackstagePassUpdater(),
+            "Sulfuras, Hand of Ragnaros": SulfurasUpdater(),
+            "Conjured Mana Cake": ConjuredItemUpdater()
+        }
+        self.default_updater = RegularItemUpdater()
 
     def update_quality(self):
         for item in self.items:
-            if item.name != "Aged Brie" and item.name != "Backstage passes to a TAFKAL80ETC concert":
-                #updated code here for "conjured Mana Cake"
-                if item.name == "Conjured Mana Cake" and item.quality >= 2:
-                    item.quality = item.quality - 2
-                elif item.quality > 0:
-                    if item.name != "Sulfuras, Hand of Ragnaros":
-                        item.quality = item.quality - 1
-            else:
-                if item.quality < 50:
-                    item.quality = item.quality + 1
-                    if item.name == "Backstage passes to a TAFKAL80ETC concert":
-                        if item.sell_in < 11:
-                            if item.quality < 50:
-                                item.quality = item.quality + 1
-                        if item.sell_in < 6:
-                            if item.quality < 50:
-                                item.quality = item.quality + 1
-            if item.name != "Sulfuras, Hand of Ragnaros":
-                item.sell_in = item.sell_in - 1
-            if item.sell_in < 0:
-                if item.name != "Aged Brie":
-                    if item.name != "Backstage passes to a TAFKAL80ETC concert":
-                        if item.quality > 0:
-                            if item.name != "Sulfuras, Hand of Ragnaros":
-                                item.quality = item.quality - 1
-                    else:
-                        item.quality = item.quality - item.quality
-                else:
-                    if item.quality < 50:
-                        item.quality = item.quality + 1
-         # updated code here so quality never goes below 0 even the set up quality is negative
-        item.quality = max(0, item.quality)
-
+            updater = self.updater_map.get(item.name, self.default_updater)
+            updater.update(item)
