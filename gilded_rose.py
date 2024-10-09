@@ -24,7 +24,6 @@ class RegularItemUpdater(QualityUpdater):
             item.quality -= 1
         if item.sell_in < 0 and item.quality > 0:
             item.quality -= 1
-        item.quality = max(0, item.quality)
 
 
 class AgedBrieUpdater(QualityUpdater):
@@ -47,7 +46,6 @@ class BackstagePassUpdater(QualityUpdater):
                 item.quality += 1
             if item.sell_in < 5:
                 item.quality += 1
-        item.quality = min(50, item.quality)
 
 
 class SulfurasUpdater(QualityUpdater):
@@ -63,7 +61,6 @@ class ConjuredItemUpdater(QualityUpdater):
             item.quality -= 2
         if item.sell_in < 0 and item.quality > 0:
             item.quality -= 2
-        item.quality = max(0, item.quality)
 
 
 class GildedRose:
@@ -81,3 +78,5 @@ class GildedRose:
         for item in self.items:
             updater = self.updater_map.get(item.name, self.default_updater)
             updater.update(item)
+            item.quality = max(0, item.quality)
+            item.quality = min(50, item.quality)
